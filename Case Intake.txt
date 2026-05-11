@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Suraksha-Vigil | Case Intake Platform</title>
+  <style>
+    :root {
+      --primary: #2c3e50;
+      --secondary: #34495e;
+      --accent: #3498db;
+      --success: #27ae60;
+      --danger: #e74c3c;
+      --light: #f5f6fa;
+      --glass: rgba(255, 255, 255, 0.9);
+    }
+
+    body { font-family: 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); margin: 0; min-height: 100vh; }
+    
+    /* Login Page Styling */
+    #login-page {
+      display: flex; justify-content: center; align-items: center; height: 100vh;
+      background: url('https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&q=80&w=1000') no-repeat center center/cover;
+    }
+    .login-card {
+      background: var(--glass); backdrop-filter: blur(10px); padding: 40px; border-radius: 15px;
+      box-shadow: 0 15px 35px rgba(0,0,0,0.2); width: 100%; max-width: 400px; text-align: center;
+      animation: fadeInDown 0.8s ease;
+    }
+    .login-card h2 { color: var(--primary); margin-bottom: 25px; }
+    .login-card input {
+      width: 100%; padding: 12px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box;
+    }
+    .btn-login {
+      width: 100%; padding: 12px; background: var(--primary); color: white; border: none; border-radius: 8px;
+      cursor: pointer; font-weight: bold; transition: 0.3s;
+    }
+    .btn-login:hover { background: var(--accent); transform: translateY(-2px); }
+
+    /* Dashboard Styling */
+    #main-dashboard { display: none; padding: 20px; animation: fadeIn 1s ease; }
+    .container { max-width: 1100px; margin: auto; }
+    
+    header {
+      background: white; padding: 25px; border-radius: 12px; text-align: center;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.05); border-bottom: 5px solid var(--primary); margin-bottom: 30px;
+      position: relative;
+    }
+    header h1 { margin: 0; color: var(--primary); letter-spacing: 1px; }
+    header p { margin: 5px 0 0; color: var(--accent); font-weight: bold; text-transform: uppercase; font-size: 0.9rem; }
+
+    /* Logout Button Styling */
+    .btn-logout {
+      position: absolute; top: 20px; right: 20px; background: var(--danger); color: white;
+      border: none; padding: 8px 15px; border-radius: 5px; cursor: pointer; font-weight: bold;
+      transition: 0.3s; font-size: 0.8rem;
+    }
+    .btn-logout:hover { background: #c0392b; transform: scale(1.05); }
+
+    /* Tabs & Search */
+    .tabs { display: flex; justify-content: center; gap: 15px; margin-bottom: 25px; flex-wrap: wrap; }
+    .tab-btn {
+      padding: 12px 25px; border: none; background: white; color: var(--primary); border-radius: 30px;
+      cursor: pointer; font-weight: 600; box-shadow: 0 4px 6px rgba(0,0,0,0.05); transition: 0.4s;
+    }
+    .tab-btn.active { background: var(--primary); color: white; transform: scale(1.05); }
+    
+    .search-box {
+      width: 100%; max-width: 500px; margin: 0 auto 30px; display: block; padding: 12px 20px;
+      border: none; border-radius: 25px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); font-size: 1rem; outline: none;
+    }
+
+    /* Report Cards */
+    .report-card {
+      background: white; padding: 18px 25px; border-radius: 12px; margin-bottom: 15px;
+      display: flex; justify-content: space-between; align-items: center;
+      transition: 0.3s; border-left: 6px solid var(--accent);
+    }
+    .report-card:hover { transform: translateX(10px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+    .btn-view {
+      background: var(--success); color: white; border: none; padding: 10px 22px; border-radius: 8px;
+      cursor: pointer; font-weight: bold; transition: 0.3s;
+    }
+    .btn-view:hover { background: #219150; box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3); }
+
+    /* CIOMS Modal Overlay */
+    #cioms-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); overflow-y: auto; z-index: 10000; padding: 40px 0; }
+    .cioms-paper { background: white; width: 210mm; margin: auto; padding: 15mm; box-shadow: 0 0 30px rgba(0,0,0,0.5); border-radius: 4px; }
+    .tools { text-align: center; margin-bottom: 25px; position: sticky; top: 0; }
+    .btn-print { background: var(--danger); color: white; padding: 12px 30px; border: none; border-radius: 30px; cursor: pointer; font-weight: bold; margin-right: 10px; }
+    .btn-close { background: #95a5a6; color: white; padding: 12px 30px; border: none; border-radius: 30px; cursor: pointer; }
+
+    /* Table Grid */
+    .cioms-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 10pt; color: black; }
+    .cioms-table td { border: 1px solid black; padding: 10px; vertical-align: top; }
+    .section-h { background: #f1f2f6; font-weight: bold; text-align: center; padding: 8px; border: 1px solid black; margin-top: 15px; }
+    .lbl { font-weight: bold; font-size: 0.75rem; color: #555; text-transform: uppercase; margin-bottom: 4px; display: block; }
+
+    /* Animations */
+    @keyframes fadeInDown { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    @media print {
+      body * { visibility: hidden; }
+      #cioms-overlay, #cioms-overlay * { visibility: visible; }
+      #cioms-overlay { position: absolute; left: 0; top: 0; padding: 0; background: white; }
+      .tools { display: none; }
+      .cioms-paper { box-shadow: none; width: 100%; padding: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="login-page">
+  <div class="login-card">
+    <img src="https://cdn-icons-png.flaticon.com/512/3063/3063067.png" width="80" alt="Logo">
+    <h2>Suraksha-Vigil Login</h2>
+    <input type="text" id="username" placeholder="Username">
+    <input type="password" id="password" placeholder="Password">
+    <button class="btn-login" onclick="validateLogin()">Access Platform</button>
+    <p id="login-err" style="color:red; margin-top:10px; font-size:0.8rem; display:none;">Invalid Credentials!</p>
+  </div>
+</div>
+
+<div id="main-dashboard">
+  <div class="container">
+    <header>
+      <button class="btn-logout" onclick="logout()">LOGOUT</button>
+      <h1>Suraksha-Vigil</h1>
+      <p>Case Intake & Criteria Check Platform</p>
+    </header>
+
+    <div class="tabs">
+      <button class="tab-btn active" onclick="changeTab(0, this)">PATIENT</button>
+      <button class="tab-btn" onclick="changeTab(1, this)">DOCTOR</button>
+      <button class="tab-btn" onclick="changeTab(2, this)">PHARMACIST</button>
+      <button class="tab-btn" onclick="changeTab(3, this)">GUARDIAN</button>
+    </div>
+
+    <input type="text" class="search-box" id="searchBar" placeholder="Search by Patient Name..." onkeyup="filterData()">
+
+    <div id="loader">🔄 Synchronizing with Database...</div>
+    <div id="data-list"></div>
+  </div>
+</div>
+
+<div id="cioms-overlay">
+  <div class="tools">
+    <button class="btn-print" onclick="window.print()">🖨️ Export to PDF</button>
+    <button class="btn-close" onclick="closePreview()">❌ Close Terminal</button>
+  </div>
+  <div class="cioms-paper" id="cioms-content"></div>
+</div>
+
+<script>
+  const scriptURL = "https://script.google.com/macros/s/AKfycbw9Qe7IpwtIKJzBf0TCsddZydsH3PLzY1iRA-AKp1yIqlTRqFqo0RC-iiDOl0_zktBw3w/exec";
+  let allSheetsData = {};
+  let currentIdx = 0;
+
+  function validateLogin() {
+    const user = document.getElementById('username').value;
+    const pass = document.getElementById('password').value;
+    
+    if(user === "admin" && pass === "pharma123") {
+      document.getElementById('login-page').style.display = 'none';
+      document.getElementById('main-dashboard').style.display = 'block';
+      loadData();
+    } else {
+      document.getElementById('login-err').style.display = 'block';
+    }
+  }
+
+  function logout() {
+    // Reloads the page to clear data and show login screen
+    location.reload();
+  }
+
+  function loadData() {
+    const script = document.createElement('script');
+    script.src = `${scriptURL}?callback=init`;
+    document.body.appendChild(script);
+  }
+
+  function init(res) {
+    allSheetsData = res;
+    document.getElementById('loader').style.display = 'none';
+    render(0);
+  }
+
+  function changeTab(idx, btn) {
+    currentIdx = idx;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    render(idx);
+  }
+
+  function render(idx) {
+    const data = allSheetsData[idx] || [];
+    let html = '';
+    if(data.length <= 1) {
+      html = "<p style='text-align:center;'>No records found in this category.</p>";
+    } else {
+      for(let i=1; i<data.length; i++) {
+        if(!data[i][0]) continue;
+        html += `
+          <div class="report-card" data-name="${data[i][0].toLowerCase()}">
+            <div class="patient-meta">
+              <strong>${data[i][0]}</strong> <br>
+              <small>Reaction: ${data[i][4]} | Date: ${data[i][21] || 'N/A'}</small>
+            </div>
+            <button class="btn-view" onclick="openCIOMS(${idx}, ${i})">Generate CIOMS</button>
+          </div>`;
+      }
+    }
+    document.getElementById('data-list').innerHTML = html;
+  }
+
+  function filterData() {
+    let input = document.getElementById('searchBar').value.toLowerCase();
+    let cards = document.getElementsByClassName('report-card');
+    Array.from(cards).forEach(card => {
+      let name = card.getAttribute('data-name');
+      card.style.display = name.includes(input) ? "flex" : "none";
+    });
+  }
+
+  function openCIOMS(sIdx, rIdx) {
+    const r = allSheetsData[sIdx][rIdx];
+    const content = `
+      <div style="text-align:center; border-bottom: 2px solid black; padding-bottom:10px;">
+        <h2 style="margin:0; color:#000;">CIOMS I FORM</h2>
+        <p style="margin:0; font-size:0.8rem; letter-spacing:1px;">SUSPECTED ADVERSE REACTION REPORT</p>
+      </div>
+
+      <div class="section-h">I. REACTION INFORMATION</div>
+      <table class="cioms-table">
+        <tr>
+          <td width="40%"><span class="lbl">1. Patient Name</span>${r[0]}</td>
+          <td width="30%"><span class="lbl">1a. Report Date</span>${r[21]}</td>
+          <td width="30%"><span class="lbl">2. Age / DOB</span>${r[1]}</td>
+        </tr>
+        <tr>
+          <td><span class="lbl">3. Gender</span>${r[2]}</td>
+          <td><span class="lbl">4. Weight (kg)</span>${r[3]}</td>
+          <td><span class="lbl">Outcome</span>${r[20]}</td>
+        </tr>
+        <tr><td colspan="3" style="height:60px;"><span class="lbl">5-6. Description of Reaction</span>${r[4]}</td></tr>
+        <tr>
+          <td><span class="lbl">Start Date</span>${r[5]}</td>
+          <td><span class="lbl">End Date</span>${r[6]}</td>
+          <td><span class="lbl">Seriousness</span>${r[19]}</td>
+        </tr>
+      </table>
+
+      <div class="section-h">II. SUSPECTED DRUG(S) INFORMATION</div>
+      <table class="cioms-table">
+        <tr>
+          <td width="40%"><span class="lbl">Medicine Name</span>${r[7]}</td>
+          <td width="30%"><span class="lbl">Dosage</span>${r[8]}</td>
+          <td width="30%"><span class="lbl">Frequency</span>${r[9]}</td>
+        </tr>
+        <tr>
+          <td><span class="lbl">Route of Admin</span>${r[10]}</td>
+          <td colspan="2"><span class="lbl">Reason for Use</span>${r[11]}</td>
+        </tr>
+        <tr>
+          <td><span class="lbl">Started</span>${r[12]}</td>
+          <td><span class="lbl">Ended</span>${r[13]}</td>
+          <td><span class="lbl">Hospitalization?</span>${r[21]}</td>
+        </tr>
+      </table>
+
+      <div class="section-h">III. CONCOMITANT DRUGS & HISTORY</div>
+      <table class="cioms-table">
+        <tr><td width="50%"><span class="lbl">Concomitant Medications</span>${r[16]}</td><td><span class="lbl">Medical History</span>${r[18]}</td></tr>
+      </table>
+
+      <div class="section-h">IV. REPORTER DETAILS</div>
+      <table class="cioms-table">
+        <tr><td width="50%"><span class="lbl">Reporter Name</span>${r[22]}</td><td><span class="lbl">Contact Info</span>${r[23]}</td></tr>
+      </table>
+
+      <div style="margin-top:25px; font-size: 0.75rem; text-align:right; color:#777;">
+        System: Suraksha-Vigil Case Intake Platform | Pharma2Tech Systems
+      </div>
+    `;
+    document.getElementById('cioms-content').innerHTML = content;
+    document.getElementById('cioms-overlay').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closePreview() {
+    document.getElementById('cioms-overlay').style.display = 'none';
+    document.body.style.overflow = 'auto';
+  }
+</script>
+</body>
+</html>
